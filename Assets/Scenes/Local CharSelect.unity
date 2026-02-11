@@ -1044,6 +1044,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43344ffb3a9b88a4395422ce719090a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  script: {fileID: 0}
 --- !u!4 &409479196
 Transform:
   m_ObjectHideFlags: 0
@@ -1311,10 +1312,18 @@ MonoBehaviour:
   - {fileID: 166329128}
   - {fileID: 408353691}
   dataList:
-  - {fileID: 11400000, guid: b9b10859db6d5984989eff1060825bca, type: 2}
-  - {fileID: 11400000, guid: b9b10859db6d5984989eff1060825bca, type: 2}
-  - {fileID: 11400000, guid: b9b10859db6d5984989eff1060825bca, type: 2}
-  - {fileID: 11400000, guid: b9b10859db6d5984989eff1060825bca, type: 2}
+  - characterName: Computer
+    portrait: {fileID: 924220150543786557, guid: c313e8b64c0a3784b8bb461ded4aae3d, type: 3}
+    gameplayPrefab: {fileID: 7754043499052550925, guid: af3a855ccd099f04eafa0608b2e346de, type: 3}
+  - characterName: Computer
+    portrait: {fileID: 924220150543786557, guid: c313e8b64c0a3784b8bb461ded4aae3d, type: 3}
+    gameplayPrefab: {fileID: 7754043499052550925, guid: af3a855ccd099f04eafa0608b2e346de, type: 3}
+  - characterName: Computer
+    portrait: {fileID: 924220150543786557, guid: c313e8b64c0a3784b8bb461ded4aae3d, type: 3}
+    gameplayPrefab: {fileID: 7754043499052550925, guid: af3a855ccd099f04eafa0608b2e346de, type: 3}
+  - characterName: Computer
+    portrait: {fileID: 924220150543786557, guid: c313e8b64c0a3784b8bb461ded4aae3d, type: 3}
+    gameplayPrefab: {fileID: 7754043499052550925, guid: af3a855ccd099f04eafa0608b2e346de, type: 3}
 --- !u!4 &668910741
 Transform:
   m_ObjectHideFlags: 0

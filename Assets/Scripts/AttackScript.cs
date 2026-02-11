@@ -9,6 +9,7 @@ public class AttackScript : MonoBehaviour
     private GameObject _visualRoot;
     private Collider2D _col;
     private HashSet<Character> _hitTargets = new();
+    public Character character;
 
     private void Awake()
     {
@@ -34,7 +35,7 @@ public class AttackScript : MonoBehaviour
         if (_hitTargets.Contains(target)) return;
 
         _hitTargets.Add(target);
-        target.TakeDamage(attackData, _visualRoot.transform.localScale.x);
+        target.TakeDamage(attackData, _visualRoot.transform.localScale.x, character.attackModifier);
     }
 }
 

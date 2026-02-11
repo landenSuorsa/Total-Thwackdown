@@ -15,7 +15,7 @@ public class CharSelectManagerScript : SelectScript
     [SerializeField] private Image[] characterImages; // 4
     [SerializeField] private Image[] slotImages; // 4 images
     [SerializeField] private TextMeshProUGUI[] slotTexts;   // 4 texts
-    public List<CharacterData> dataList;
+    [SerializeField] public List<CharacterData> dataList;
     private MatchSessionScript matchSession;
 
     public void Awake()
@@ -106,7 +106,7 @@ public class PlayerSlot
     public bool lockedIn;
 }
 
-[CreateAssetMenu(menuName = "Characters/Character")]
+[System.Serializable]
 public class CharacterData : Data
 {
     public string characterName;
@@ -114,7 +114,8 @@ public class CharacterData : Data
     public GameObject gameplayPrefab;
 }
 
-public class Data : ScriptableObject
+[System.Serializable]
+public class Data
 {
 
 }

@@ -4,9 +4,9 @@ using UnityEngine.InputSystem;
 
 public abstract class Character : MonoBehaviour
 {
-    private Rigidbody2D _rb;
-    private BoxCollider2D _bc;
-    private Animator _anim;
+    public Rigidbody2D _rb;
+    public BoxCollider2D _bc;
+    public Animator _anim;
 
     private float _damageTaken;
 
@@ -27,7 +27,7 @@ public abstract class Character : MonoBehaviour
     [SerializeField] private float minBounceSpeed = 2f;
 
 
-    private Dictionary<int, AttackScript> _hitboxMap;
+    public Dictionary<int, AttackScript> _hitboxMap;
 
     private Vector2 _movement;
     private bool _isGrounded;
@@ -35,10 +35,14 @@ public abstract class Character : MonoBehaviour
     private bool _jumpReleased;
     private bool _normalPressed;
     private bool _specialPressed;
-    private bool _inAttack;
+    public bool _inAttack;
     private bool _isStunned;
+    public float attackModifier = 1f;
+    public bool isFacingRight = true;
+    public bool canUpSpecial = true;
 
-    private int _currentAttackState;
+
+    public int _currentAttackState;
 
     private void Awake()
     {
@@ -61,19 +65,26 @@ public abstract class Character : MonoBehaviour
         UpdateAttackLifecycle();
 
         if (Mathf.Abs(_movement.x) > 0.05f)
+        {
+            isFacingRight = _movement.x >= 0 ? true : false;
             _visualRoot.localScale = new Vector3(_movement.x >= 0 ? 1 : -1, 1, 1);
+        }
     }
 
     private void FixedUpdate()
     {
         _isGrounded = Grounded();
+        if (_isGrounded)
+        {
+            canUpSpecial = true;
+        }
         HandleVelocity();
         HandleAttack();
     }
 
     // ================= ATTACK SYSTEM =================
 
-    private void HandleAttack()
+    void HandleAttack()
     {
         if (_inAttack || _isStunned) return;
 
@@ -94,8 +105,9 @@ public abstract class Character : MonoBehaviour
             StartAttack(attackState);
     }
 
-    private void StartAttack(int attackState)
+    public virtual void StartAttack(int attackState)
     {
+         
         _inAttack = true;
         _currentAttackState = attackState;
 
@@ -106,7 +118,7 @@ public abstract class Character : MonoBehaviour
             hitbox.enabled = true;
     }
 
-    private void UpdateAttackLifecycle()
+    void UpdateAttackLifecycle()
     {
         if (!_inAttack) return;
 
@@ -127,7 +139,7 @@ public abstract class Character : MonoBehaviour
         DisableAllHitboxes();
     }
 
-    private void DisableAllHitboxes()
+    public void DisableAllHitboxes()
     {
         foreach (var hb in _hitboxMap.Values)
             hb.enabled = false;
@@ -135,9 +147,9 @@ public abstract class Character : MonoBehaviour
 
     // ================= DAMAGE =================
 
-    public void TakeDamage(AttackData data, float dir)
+    public void TakeDamage(AttackData data, float dir, float attackModifier)
     {
-        _damageTaken += data.damageAmount;
+        _damageTaken += data.damageAmount * attackModifier;
         print(_damageTaken);
         ApplyStun(data.stunAmount);
         ApplyKnockback(data.damageAmount, new Vector2(data.knockback_dir.x * dir, data.knockback_dir.y));
@@ -212,9 +224,9 @@ public abstract class Character : MonoBehaviour
 
     private int DirectionToAttackState(Vector2 move)
     {
-        if (Mathf.Abs(move.x) > STICK_THRESHOLD) return 1;
         if (move.y > STICK_THRESHOLD) return 2;
         if (move.y < -STICK_THRESHOLD) return 3;
+        if (Mathf.Abs(move.x) > STICK_THRESHOLD) return 1;
         return 4;
     }
 
