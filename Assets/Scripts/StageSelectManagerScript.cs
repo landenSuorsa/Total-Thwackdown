@@ -70,7 +70,7 @@ public class StageSelectManagerScript : SelectScript
     }
 }
 
-[System.Serializable]
+[CreateAssetMenu(menuName = "Stage/StageData")]
 public class StageData : Data
 {
     public string stage_name;

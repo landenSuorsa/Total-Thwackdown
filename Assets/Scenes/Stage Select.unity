@@ -524,18 +524,10 @@ MonoBehaviour:
   - {fileID: 1843501146}
   - {fileID: 1843348119}
   dataList:
-  - stage_name: Computer Stage
-    portrait: {fileID: 5157154369731487759, guid: b695103e805c8904c99c4e65b9a1be02, type: 3}
-    scene_name: ComputerStage
-  - stage_name: Computer Stage
-    portrait: {fileID: 5157154369731487759, guid: b695103e805c8904c99c4e65b9a1be02, type: 3}
-    scene_name: ComputerStage
-  - stage_name: Computer Stage
-    portrait: {fileID: 5157154369731487759, guid: b695103e805c8904c99c4e65b9a1be02, type: 3}
-    scene_name: ComputerStage
-  - stage_name: Computer Stage
-    portrait: {fileID: 5157154369731487759, guid: b695103e805c8904c99c4e65b9a1be02, type: 3}
-    scene_name: ComputerStage
+  - {fileID: 11400000, guid: 0dae2bc66b36fa2478488ad0a5cab4f0, type: 2}
+  - {fileID: 11400000, guid: 0dae2bc66b36fa2478488ad0a5cab4f0, type: 2}
+  - {fileID: 11400000, guid: 0dae2bc66b36fa2478488ad0a5cab4f0, type: 2}
+  - {fileID: 11400000, guid: 0dae2bc66b36fa2478488ad0a5cab4f0, type: 2}
 --- !u!1 &1027263444
 GameObject:
   m_ObjectHideFlags: 0

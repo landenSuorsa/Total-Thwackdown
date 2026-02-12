@@ -49,20 +49,17 @@ public class MatchSessionScript : MonoBehaviour
         }
     }
 
-    public List<GameObject> LoadPlayersGame(List<Transform> spawnPoints) 
+    public void LoadPlayersGame(List<Transform> spawnPoints) 
     {
         var counter = 0;
-        var toReturn = new List<GameObject>();
         foreach (PlayerSelection player in Players)
         {
             GameObject newCharacter = PlayerInput.Instantiate(player.character.gameplayPrefab, pairWithDevice: player.inputDev).gameObject;
-            toReturn.Add(newCharacter);
             if (spawnPoints != null && spawnPoints.Count >= 4)
             {
                 newCharacter.transform.position = spawnPoints[counter++].position;
             }
         }
-        return toReturn;
     }
 }
 

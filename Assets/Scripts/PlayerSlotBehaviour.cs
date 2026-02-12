@@ -7,8 +7,6 @@ public class PlayerSlotBehaviour : MonoBehaviour
     public PlayerSlot slot;
     SelectScript manager;
     public bool canConfirm = false;
-    [SerializeField] float repeatDelay = 0.2f;
-    private float lastMove = -1f;
 
     public void Init(SelectScript mgr, PlayerInput input, int playerIndex, int index)
     {
@@ -27,11 +25,10 @@ public class PlayerSlotBehaviour : MonoBehaviour
     // INPUT CALLBACKS (called by PlayerInput)
     public void OnMove(InputValue value)
     {
-        if (!canConfirm) return;
-        if (Time.time - lastMove < repeatDelay) return;
+        print("ON MOVE");
         float x = value.Get<Vector2>().x;
         if (Mathf.Abs(x) < 0.5f) return;
-        lastMove = Time.time;
+
         manager.MoveCursor(slot, x > 0 ? 1 : -1);
     }
 
