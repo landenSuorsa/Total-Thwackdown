@@ -9,6 +9,7 @@ public class ComputerScript : Character
     [SerializeField] GameObject error101;
     [SerializeField] GameObject error200;
     [SerializeField] GameObject error301;
+    [SerializeField] ParticleSystem particles;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void StartAttack(int attackState)
@@ -54,6 +55,8 @@ public class ComputerScript : Character
             _rb.position = new Vector2(_rb.position.x, _rb.position.y + teleUpDistance - _bc.size.y);
         }
         _rb.linearVelocityY = 0;
+        _rb.gravityScale = 0;
+        Invoke("ResetGravity", 1f);
     }
 
     private void ErrorAttack()
@@ -77,6 +80,7 @@ public class ComputerScript : Character
         GameObject error = Instantiate(error101, _rb.position + new Vector2(isFacingRight ? 1 : -1, 0), Quaternion.identity);
         error.GetComponent<Rigidbody2D>().linearVelocity = new Vector2(isFacingRight ? 3 : -3, 0);
         error.GetComponent<Error101Script>().hitTargets.Add(this);
+        error.GetComponent<Error101Script>().attackData.knockback_dir *= new Vector2(isFacingRight ? 1 : -1, 0);
     }
 
     private void Error200Attack()
@@ -84,6 +88,7 @@ public class ComputerScript : Character
         GameObject error = Instantiate(error200, _rb.position + new Vector2(isFacingRight ? 1 : -1, 0), Quaternion.identity);
         error.GetComponent<Rigidbody2D>().linearVelocity = new Vector2(isFacingRight ? 6 : -6, 0);
         error.GetComponent<Error200Script>().hitTargets.Add(this);
+        error.GetComponent<Error200Script>().attackData.knockback_dir *= new Vector2(isFacingRight ? 1 : -1, 0);
     }
 
     private void Error301Attack()
@@ -91,18 +96,21 @@ public class ComputerScript : Character
         GameObject error = Instantiate(error301, _rb.position + new Vector2(isFacingRight ? 1 : -1, 0), Quaternion.identity);
         error.GetComponent<Rigidbody2D>().linearVelocity = new Vector2(isFacingRight ? 6 : -6, 0);
         error.GetComponent<Error301Script>().hitTargets.Add(this);
+        error.GetComponent<Error301Script>().attackData.knockback_dir *= new Vector2(isFacingRight ? 1 : -1, 0);
     }
 
     private void FireAttack()
     {
         GameObject error = Instantiate(firePrefab, _rb.position + new Vector2(isFacingRight ? 1 : -1, -_bc.size.y / 2), Quaternion.identity);
         error.GetComponent<FireScript>().hitTargets.Add(this);
+        error.GetComponent<FireScript>().attackData.knockback_dir *= new Vector2(isFacingRight ? 1 : -1, 0);
     }
 
     private void PowerUp()
     {
         attackModifier = 1.35f;
         StartCoroutine("DamageTicks");
+        particles.Play();
     }
 
     private IEnumerator DamageTicks()
@@ -114,8 +122,14 @@ public class ComputerScript : Character
         for (int i = 0; i < 5; i++)
         {
             TakeDamage(attackData, 1, 1);
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(2.5f);
         }
+        particles.Stop();
         attackModifier = 1f;
+    }
+
+    private void ResetGravity()
+    {
+        _rb.gravityScale = gravity;
     }
 }

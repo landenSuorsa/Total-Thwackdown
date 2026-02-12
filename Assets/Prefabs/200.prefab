@@ -154,9 +154,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Error200Script
   hitTargets: []
   attackData:
-    damageAmount: 6
+    damageAmount: 4
     knockback_dir: {x: 1, y: 1}
-    stunAmount: 1
+    stunAmount: 0.8
   lifetime: 6
   attackModifier: 1
 --- !u!50 &8561463052750963250

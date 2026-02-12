@@ -20,6 +20,11 @@ public class StageSelectManagerScript : SelectScript
     {
         matchSession = FindFirstObjectByType<MatchSessionScript>();
         matchSession.LoadPlayers(cursorPrefab);
+        var counter = 0;
+        foreach (Image stageImage in stageImages)
+        {
+            stageImage.sprite = dataList[counter++].portrait;
+        }
     }
 
     public override void MoveCursor(PlayerSlot player, int direction)
@@ -43,6 +48,19 @@ public class StageSelectManagerScript : SelectScript
             }
         }
         else
+        {
+            player.lockedIn = false;
+            player.selected = null;
+        }
+    }
+
+    public override void Back(PlayerSlot player)
+    {
+        if (!player.lockedIn)
+        {
+            matchSession.ClearPlayers();
+            SceneManager.LoadScene("Local CharSelect");
+        } else
         {
             player.lockedIn = false;
             player.selected = null;

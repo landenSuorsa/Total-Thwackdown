@@ -41,8 +41,25 @@ public class PlayerSlotBehaviour : MonoBehaviour
         manager.LockIn(slot);
     }
 
+    public void OnSelect()
+    {
+        if (!canConfirm) return;
+        manager.Select(slot);
+    }
+
+    public void OnBack()
+    {
+        if (!canConfirm) return;
+        manager.Back(slot);
+    }
+
     void SetCanConfirm()
     {
         canConfirm = true;
+    }
+
+    public void OnStart()
+    {
+        manager.Start();
     }
 }

@@ -8,12 +8,15 @@ public abstract class Character : MonoBehaviour
     public BoxCollider2D _bc;
     public Animator _anim;
 
+    public StageManagerScript stage;
+
     private float _damageTaken;
 
-    [SerializeField] private float damageToKnockbackRatio = 1f;
+    [SerializeField] private float damageToKnockbackRatio = 0.5f;
 
     [Header("Movement")]
     [SerializeField] private Transform _visualRoot;
+    [SerializeField] public Transform UI;
     [SerializeField] private float MOVEMENT_SPEED = 5f;
     [SerializeField] private float JUMP_FORCE = 5f;
     [SerializeField] private float JUMP_REDUCTION = 0.8f;
@@ -23,23 +26,22 @@ public abstract class Character : MonoBehaviour
     [SerializeField] private List<AttackScript> attackHitboxes;
 
     [Header("Knockback Bounce")]
-    [SerializeField] private float bounceDamping = 0.8f; // 0.6–0.85 feels good
+    [SerializeField] private float bounceDamping = 0.8f; 
     [SerializeField] private float minBounceSpeed = 2f;
 
 
     public Dictionary<int, AttackScript> _hitboxMap;
 
-    private Vector2 _movement;
-    private bool _isGrounded;
-    private bool _jumpPressed;
-    private bool _jumpReleased;
-    private bool _normalPressed;
-    private bool _specialPressed;
+    public bool _isGrounded;
+    private InputState _input;
     public bool _inAttack;
     private bool _isStunned;
     public float attackModifier = 1f;
     public bool isFacingRight = true;
     public bool canUpSpecial = true;
+    public float gravity;
+    public IInputProvider _inputProvider;
+    public bool inMatch = true;
 
 
     public int _currentAttackState;
@@ -49,6 +51,7 @@ public abstract class Character : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _bc = GetComponent<BoxCollider2D>();
         _anim = _visualRoot.GetComponent<Animator>();
+        gravity = _rb.gravityScale;
 
         _hitboxMap = new Dictionary<int, AttackScript>();
         foreach (var hb in attackHitboxes)
@@ -61,13 +64,14 @@ public abstract class Character : MonoBehaviour
 
     private void Update()
     {
+        SetInput(_inputProvider.GetInput());
         HandleAnimationState();
         UpdateAttackLifecycle();
 
-        if (Mathf.Abs(_movement.x) > 0.05f)
+        if (Mathf.Abs(_input.Move.x) > 0.05f)
         {
-            isFacingRight = _movement.x >= 0 ? true : false;
-            _visualRoot.localScale = new Vector3(_movement.x >= 0 ? 1 : -1, 1, 1);
+            isFacingRight = _input.Move.x >= 0 ? true : false;
+            _visualRoot.localScale = new Vector3(_input.Move.x >= 0 ? 1 : -1, 1, 1);
         }
     }
 
@@ -90,15 +94,15 @@ public abstract class Character : MonoBehaviour
 
         int attackState = 0;
 
-        if (_normalPressed)
+        if (_input.NormalPressed)
         {
-            _normalPressed = false;
-            attackState = DirectionToAttackState(_movement);
+            _input.NormalPressed = false;
+            attackState = DirectionToAttackState(_input.Move);
         }
-        else if (_specialPressed)
+        else if (_input.SpecialPressed)
         {
-            _specialPressed = false;
-            attackState = 10 + DirectionToAttackState(_movement);
+            _input.SpecialPressed = false;
+            attackState = 10 + DirectionToAttackState(_input.Move);
         }
 
         if (attackState > 0)
@@ -153,6 +157,7 @@ public abstract class Character : MonoBehaviour
         print(_damageTaken);
         ApplyStun(data.stunAmount);
         ApplyKnockback(data.damageAmount, new Vector2(data.knockback_dir.x * dir, data.knockback_dir.y));
+        stage.UpdateHealth(_damageTaken, gameObject);
     }
 
     private void ApplyStun(float duration)
@@ -176,7 +181,7 @@ public abstract class Character : MonoBehaviour
         // Scale knockback with accumulated damage (Smash-style curve)
         float knockback =
             baseDamage * damageToKnockbackRatio *
-            (1f + _damageTaken * 0.01f);
+            Mathf.Pow(1f + _damageTaken * 0.01f, 0.75f);
 
         // Cancel opposing momentum only
         Vector2 v = _rb.linearVelocity;
@@ -190,7 +195,9 @@ public abstract class Character : MonoBehaviour
         _rb.linearVelocity = v;
 
         // Apply impulse force
+        _rb.linearVelocity = Vector2.zero;
         _rb.AddForce(dir * knockback, ForceMode2D.Impulse);
+
     }
 
 
@@ -209,14 +216,14 @@ public abstract class Character : MonoBehaviour
     {
         if (_isStunned) return;
 
-        _rb.linearVelocity = new Vector2(_movement.x * MOVEMENT_SPEED, _rb.linearVelocity.y);
+        _rb.linearVelocity = new Vector2(_input.Move.x * MOVEMENT_SPEED, _rb.linearVelocity.y);
 
-        if (_isGrounded && _jumpPressed)
+        if (_isGrounded && _input.JumpPressed)
         {
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, JUMP_FORCE);
-            _jumpPressed = false;
+            _input.JumpPressed = false;
         }
-        else if (_jumpReleased && _rb.linearVelocity.y > 0.01f)
+        else if (_input.JumpReleased && _rb.linearVelocity.y > 0.01f)
         {
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _rb.linearVelocity.y * JUMP_REDUCTION);
         }
@@ -232,15 +239,10 @@ public abstract class Character : MonoBehaviour
 
     // ================= INPUT =================
 
-    public void OnMove(InputValue input) => _movement = input.Get<Vector2>();
-    public void OnJump(InputValue input)
+    public void SetInput(InputState input)
     {
-        _jumpPressed = input.isPressed;
-        _jumpReleased = !input.isPressed;
+        _input = input;
     }
-
-    public void OnNormal(InputValue input) => _normalPressed = input.isPressed;
-    public void OnSpecial(InputValue input) => _specialPressed = input.isPressed;
 
     // ================= GROUND =================
 
@@ -285,4 +287,18 @@ public abstract class Character : MonoBehaviour
     }
 
 
+}
+
+public struct InputState
+{
+    public Vector2 Move;
+    public bool JumpPressed;
+    public bool JumpReleased;
+    public bool NormalPressed;
+    public bool SpecialPressed;
+}
+
+public interface IInputProvider
+{
+    InputState GetInput();
 }
