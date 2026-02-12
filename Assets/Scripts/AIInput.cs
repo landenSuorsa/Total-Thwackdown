@@ -32,6 +32,8 @@ public class AIInput : MonoBehaviour, IInputProvider
     private float nextSwitchTime = 0f;
     private GameObject currentTarget = null;
 
+    private bool _isActive = false;
+
     void Awake()
     {
         _character = GetComponent<Character>();
@@ -117,17 +119,17 @@ public class AIInput : MonoBehaviour, IInputProvider
         }
     }
 
-    public InputState GetInput() => _input;
+    public InputState GetInput() => _isActive ? _input : new InputState();
 
     // ---------------- HELPER FUNCTIONS ----------------
     private GameObject PickRandomTarget()
     {
-        var allChars = _character.stage.characters;
+        var allChars = _character.game.GetActivePlayers();
         List<GameObject> validTargets = new List<GameObject>();
 
         foreach (var c in allChars)
         {
-            if (c != gameObject && c.GetComponent<Character>().inMatch) validTargets.Add(c);
+            if (c != gameObject && !c.GetComponent<Character>().isDead) validTargets.Add(c);
         }
 
         if (validTargets.Count == 0) return null;
@@ -188,4 +190,8 @@ public class AIInput : MonoBehaviour, IInputProvider
 
         return false;
     }
+
+    public void Deactivate() => _isActive = false;
+
+    public void Activate() => _isActive = true;
 }

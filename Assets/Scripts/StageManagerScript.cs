@@ -1,73 +1,122 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using TMPro;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.InputSystem.Android;
-using UnityEngine.UI;
 
 public class StageManagerScript : MonoBehaviour
 {
-    private MatchSessionScript _sessionScript;
+    [Header("Spawn Points")]
     [SerializeField] private List<Transform> spawnPoints;
-    public List<GameObject> characters;
-    [SerializeField] List<RectTransform> playerUIs;
-    List<Image> playerPanels = new List<Image>();
-    List<Image> playerPortraits = new List<Image>();
-    List<TextMeshProUGUI> playerDamages = new List<TextMeshProUGUI>();
-    List<List<Image>> playerStocks = new List<List<Image>>();
 
-    private Color[] colors = { Color.red, Color.blue, Color.yellow, Color.gray };
+    [Header("Blast Zones")]
+    [SerializeField] private GameObject blastZoneTop;
+    [SerializeField] private GameObject blastZoneBottom;
+    [SerializeField] private GameObject blastZoneLeft;
+    [SerializeField] private GameObject blastZoneRight;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [Header("Stage Bounds")]
+    [SerializeField] private Vector2 stageBoundsMin = new Vector2(-20, -15);
+    [SerializeField] private Vector2 stageBoundsMax = new Vector2(20, 15);
+
+    private GameLoopManager gameLoopManager;
+
+    void Awake()
+    {
+        //SetupBlastZones();
+    }
+
     void Start()
     {
-        _sessionScript = FindFirstObjectByType<MatchSessionScript>();
-        characters = _sessionScript.LoadPlayersGame(spawnPoints);
-        var counter = 0;
-        
-        foreach (GameObject character in characters)
+        gameLoopManager = FindFirstObjectByType<GameLoopManager>();
+
+        if (gameLoopManager == null)
         {
-            playerPanels.Add(playerUIs[counter].GetChild(0).gameObject.GetComponent<Image>());
-            playerPortraits.Add(playerUIs[counter].GetChild(1).gameObject.GetComponent<Image>());
-            playerDamages.Add(playerUIs[counter].GetChild(2).gameObject.GetComponent<TextMeshProUGUI>());
-
-            List<Image> newList = new List<Image>();
-            for (int i = 0; i < 3; i++)
-            {
-                newList.Add(playerUIs[counter].GetChild(3).GetChild(i).gameObject.GetComponent<Image>());
-            }
-            playerStocks.Add(newList);
-
-            var portrait = _sessionScript.Players[counter].character.portrait;
-            playerUIs[counter].gameObject.SetActive(true);
-            playerPanels[counter].color = new Color(colors[counter].r, colors[counter].g, colors[counter].b, 0.3f);
-            playerPortraits[counter].sprite = portrait;
-            foreach (var stock in playerStocks[counter])
-            {
-                stock.sprite = portrait;
-            }
-
-            counter++;
-            character.GetComponent<Character>().stage = this;
+            Debug.LogError("GameLoopManager not found :(");
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    //void SetupBlastZones()
+    //{
+    //    if (blastZoneBottom == null)
+    //    {
+    //        blastZoneBottom = CreateBlastZone("BlastZone_Bottom",
+    //            new Vector2(0, stageBoundsMin.y - 2),
+    //            new Vector2(Mathf.Abs(stageBoundsMax.x - stageBoundsMin.x) + 10, 2),
+    //           BlastZone.BlastZoneType.Bottom);
+    //    }
 
-    public void UpdateHealth(float damageAmount, GameObject character)
+    //    // Top blast zone
+    //    if (blastZoneTop == null)
+    //    {
+    //        blastZoneTop = CreateBlastZone("BlastZone_Top",
+    //            new Vector2(0, stageBoundsMax.y + 2),
+    //            new Vector2(Mathf.Abs(stageBoundsMax.x - stageBoundsMin.x) + 10, 2),
+    //            BlastZone.BlastZoneType.Top);
+    //    }
+
+    //    // Left blast zone
+    //    if (blastZoneLeft == null)
+    //    {
+    //        blastZoneLeft = CreateBlastZone("BlastZone_Left",
+    //            new Vector2(stageBoundsMin.x - 2, 0),
+    //            new Vector2(2, Mathf.Abs(stageBoundsMax.y - stageBoundsMin.y) + 10),
+    //            BlastZone.BlastZoneType.Left);
+    //    }
+
+    //    // Right blast zone
+    //    if (blastZoneRight == null)
+    //    {
+    //        blastZoneRight = CreateBlastZone("BlastZone_Right",
+    //            new Vector2(stageBoundsMax.x + 2, 0),
+    //            new Vector2(2, Mathf.Abs(stageBoundsMax.y - stageBoundsMin.y) + 10),
+    //            BlastZone.BlastZoneType.Right);
+    //    }
+    //}
+
+    //GameObject CreateBlastZone(string name, Vector2 position, Vector2 size, BlastZone.BlastZoneType type)
+    //{
+    //    GameObject zone = new GameObject(name);
+    //    zone.transform.parent = transform;
+    //    zone.transform.position = position;
+
+    //    BoxCollider2D collider = zone.AddComponent<BoxCollider2D>();
+    //    collider.size = size;
+    //    collider.isTrigger = true;
+
+    //    BlastZone blastZone = zone.AddComponent<BlastZone>();
+    //    // You'll need to set the zone type via serialized field or public property
+
+    //    return zone;
+    //}
+
+    void OnDrawGizmos()
     {
-        for (int i = 0; i < characters.Count; i++)
+        // Draw stage bounds
+        Gizmos.color = Color.green;
+        Vector3 bottomLeft = new Vector3(stageBoundsMin.x, stageBoundsMin.y, 0);
+        Vector3 bottomRight = new Vector3(stageBoundsMax.x, stageBoundsMin.y, 0);
+        Vector3 topLeft = new Vector3(stageBoundsMin.x, stageBoundsMax.y, 0);
+        Vector3 topRight = new Vector3(stageBoundsMax.x, stageBoundsMax.y, 0);
+
+        Gizmos.DrawLine(bottomLeft, bottomRight);
+        Gizmos.DrawLine(bottomRight, topRight);
+        Gizmos.DrawLine(topRight, topLeft);
+        Gizmos.DrawLine(topLeft, bottomLeft);
+
+        // Draw spawn points
+        if (spawnPoints != null)
         {
-            if (characters[i] == character)
+            Gizmos.color = Color.blue;
+            foreach (Transform spawn in spawnPoints)
             {
-                playerDamages[i].text = damageAmount.ToString("F1") + "%";
-                break;
+                if (spawn != null)
+                {
+                    Gizmos.DrawWireSphere(spawn.position, 0.5f);
+                }
             }
         }
+    }
+
+    public List<Transform> GetSpawnPoints()
+    {
+        return spawnPoints;
     }
 }

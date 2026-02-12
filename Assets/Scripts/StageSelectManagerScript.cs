@@ -60,7 +60,8 @@ public class StageSelectManagerScript : SelectScript
         {
             matchSession.ClearPlayers();
             SceneManager.LoadScene("Local CharSelect");
-        } else
+        }
+        else
         {
             player.lockedIn = false;
             player.selected = null;
@@ -69,7 +70,7 @@ public class StageSelectManagerScript : SelectScript
 
     void StartMatch()
     {
-        Dictionary<string, int> dict = new Dictionary<string, int>(); 
+        Dictionary<string, int> dict = new Dictionary<string, int>();
         foreach (PlayerSlot player in players)
         {
             dict.TryGetValue(((StageData)player.selected).scene_name, out int value);
@@ -95,4 +96,3 @@ public class StageData : Data
     public Sprite portrait;
     public string scene_name;
 }
-

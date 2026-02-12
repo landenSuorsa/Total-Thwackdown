@@ -125,7 +125,7 @@ public class CharSelectManagerScript : SelectScript
     {
         foreach (PlayerSlot player in players)
         {
-            matchSession.AddPlayer(new PlayerSelection { inputDev = player.input ? player.input.devices[0] : null, character = (CharacterData)player.selected, playerIndex = player.playerIndex });
+            matchSession.AddPlayer(new PlayerInfo { inputDev = player.input ? player.input.devices[0] : null, character = (CharacterData)player.selected, playerIndex = player.playerIndex, stocksRemaining = 3, isEliminated = false });
         }
         // TODO: Transitiony stuff (fade out or something)
         SceneManager.LoadScene("Stage Select");

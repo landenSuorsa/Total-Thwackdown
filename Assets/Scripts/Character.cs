@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,8 +8,9 @@ public abstract class Character : MonoBehaviour
     public Rigidbody2D _rb;
     public BoxCollider2D _bc;
     public Animator _anim;
+    public SpriteRenderer _sr;
 
-    public StageManagerScript stage;
+    public GameLoopManager game;
 
     private float _damageTaken;
 
@@ -41,7 +43,20 @@ public abstract class Character : MonoBehaviour
     public bool canUpSpecial = true;
     public float gravity;
     public IInputProvider _inputProvider;
-    public bool inMatch = true;
+
+    [Header("Player Info")]
+    public int playerIndex;
+
+    [Header("State")]
+    public bool isDead = false;
+    public bool controlsEnabled = false;
+
+    [Header("Respawn Settings")]
+    [SerializeField] private float invulnerabilityDuration = 2f;
+    private bool isInvulnerable = false;
+
+    // Events
+    public event Action<int> OnPlayerDeath;
 
 
     public int _currentAttackState;
@@ -51,7 +66,9 @@ public abstract class Character : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _bc = GetComponent<BoxCollider2D>();
         _anim = _visualRoot.GetComponent<Animator>();
+        _sr = _visualRoot.GetComponent<SpriteRenderer>();
         gravity = _rb.gravityScale;
+        game = FindFirstObjectByType<GameLoopManager>();
 
         _hitboxMap = new Dictionary<int, AttackScript>();
         foreach (var hb in attackHitboxes)
@@ -60,6 +77,11 @@ public abstract class Character : MonoBehaviour
             hb.enabled = false;
             _hitboxMap[hb.attackState] = hb;
         }
+    }
+
+    private void Start()
+    {
+        DisableControls();
     }
 
     private void Update()
@@ -153,11 +175,12 @@ public abstract class Character : MonoBehaviour
 
     public void TakeDamage(AttackData data, float dir, float attackModifier)
     {
+        if (isInvulnerable || isDead) return;
         _damageTaken += data.damageAmount * attackModifier;
         print(_damageTaken);
         ApplyStun(data.stunAmount);
         ApplyKnockback(data.damageAmount, new Vector2(data.knockback_dir.x * dir, data.knockback_dir.y));
-        stage.UpdateHealth(_damageTaken, gameObject);
+        //stage.UpdateHealth(_damageTaken, gameObject);
     }
 
     private void ApplyStun(float duration)
@@ -176,6 +199,7 @@ public abstract class Character : MonoBehaviour
 
     private void ApplyKnockback(float baseDamage, Vector2 dir)
     {
+        if (isInvulnerable || isDead) return;
         dir = dir.normalized;
 
         // Scale knockback with accumulated damage (Smash-style curve)
@@ -198,6 +222,123 @@ public abstract class Character : MonoBehaviour
         _rb.linearVelocity = Vector2.zero;
         _rb.AddForce(dir * knockback, ForceMode2D.Impulse);
 
+    }
+
+    System.Collections.IEnumerator FlashSprite()
+    {
+        while (isInvulnerable)
+        {
+            if (_sr != null)
+            {
+                Color color = _sr.color;
+                color.a = 0.3f;
+                _sr.color = color;
+            }
+
+            yield return new WaitForSeconds(0.1f);
+
+            if (_sr != null)
+            {
+                Color color = _sr.color;
+                color.a = 1f;
+                _sr.color = color;
+            }
+
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+    void StartInvulnerability()
+    {
+        isInvulnerable = true;
+        Invoke(nameof(EndInvulnerability), invulnerabilityDuration);
+
+        // Visual feedback - flashing
+        if (_sr != null)
+        {
+            StartCoroutine(FlashSprite());
+        }
+    }
+
+    void EndInvulnerability()
+    {
+        isInvulnerable = false;
+        StopCoroutine(FlashSprite());
+
+        if (_sr != null)
+        {
+            Color color = _sr.color;
+            color.a = 1f;
+            _sr.color = color;
+        }
+    }
+
+    public void EnableControls()
+    {
+        controlsEnabled = true;
+        if (_inputProvider != null)
+        {
+            _inputProvider.Activate();
+        }
+        // Enable your character movement script
+        // if (characterMovement != null) characterMovement.enabled = true;
+    }
+
+    public void DisableControls()
+    {
+        controlsEnabled = false;
+        if (_inputProvider != null)
+        {
+            _inputProvider.Deactivate();
+        }
+        // Disable your character movement script
+        // if (characterMovement != null) characterMovement.enabled = false;
+    }
+
+    public void Die()
+    {
+        if (isDead) return;
+
+        isDead = true;
+        DisableControls();
+
+        // Visual feedback
+        if (_sr != null)
+        {
+            _sr.enabled = false;
+        }
+
+        // Disable physics
+        if (_rb != null)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            _rb.simulated = false;
+        }
+
+        // Trigger death event
+        OnPlayerDeath?.Invoke(playerIndex);
+    }
+
+    public void Respawn(Vector3 position)
+    {
+        transform.position = position;
+        isDead = false;
+
+        // Reset physics
+        if (_rb != null)
+        {
+            _rb.simulated = true;
+            _rb.linearVelocity = Vector2.zero;
+        }
+
+        // Visual feedback
+        if (_sr != null)
+        {
+            _sr.enabled = true;
+        }
+
+        EnableControls();
+        StartInvulnerability();
     }
 
 
@@ -301,4 +442,7 @@ public struct InputState
 public interface IInputProvider
 {
     InputState GetInput();
+
+    void Deactivate();
+    void Activate();
 }

@@ -13,7 +13,7 @@ public class MatchSessionScript : MonoBehaviour
 
     private Color[] colors = { Color.red, Color.blue, Color.yellow, Color.gray };
 
-    public List<PlayerSelection> Players = new();
+    public List<PlayerInfo> Players = new();
 
     void Awake()
     {
@@ -27,7 +27,7 @@ public class MatchSessionScript : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void AddPlayer(PlayerSelection player)
+    public void AddPlayer(PlayerInfo player)
     {
         Players.Add(player);
     }
@@ -41,7 +41,7 @@ public class MatchSessionScript : MonoBehaviour
     public void LoadPlayers(GameObject playerControlledPrefab)
     {
         script = FindFirstObjectByType<SelectScript>();
-        foreach (PlayerSelection player in Players)
+        foreach (PlayerInfo player in Players)
         {
             if (player.inputDev == null) return;
             var input = PlayerInput.Instantiate(playerControlledPrefab, pairWithDevice: player.inputDev);
@@ -60,7 +60,7 @@ public class MatchSessionScript : MonoBehaviour
     {
         var counter = 0;
         var toReturn = new List<GameObject>();
-        foreach (PlayerSelection player in Players)
+        foreach (PlayerInfo player in Players)
         {
             GameObject newCharacter;
             if (player.inputDev != null)
@@ -92,9 +92,11 @@ public class MatchSessionScript : MonoBehaviour
     }
 }
 
-public class PlayerSelection
+public class PlayerInfo
 {
     public InputDevice inputDev;
     public int playerIndex;
     public CharacterData character;
+    public int stocksRemaining;
+    public bool isEliminated;
 }

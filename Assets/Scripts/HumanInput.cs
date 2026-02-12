@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class HumanInput : MonoBehaviour, IInputProvider
 {
     private InputState _input;
+    private bool _isActive = true;
 
     void Update()
     {
@@ -12,7 +13,7 @@ public class HumanInput : MonoBehaviour, IInputProvider
 
     public InputState GetInput()
     {
-        return _input;
+        return _isActive ? _input : new InputState();
     }
 
     public void OnMove(InputValue val)
@@ -35,4 +36,8 @@ public class HumanInput : MonoBehaviour, IInputProvider
     {
         _input.SpecialPressed = val.isPressed;
     }
+
+    public void Deactivate() => _isActive = false;
+
+    public void Activate() => _isActive = true;
 }
