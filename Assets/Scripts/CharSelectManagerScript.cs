@@ -16,6 +16,7 @@ public class CharSelectManagerScript : SelectScript
     [SerializeField] private Image[] slotImages; // 4 images
     [SerializeField] private TextMeshProUGUI[] slotTexts;   // 4 texts
     [SerializeField] public List<CharacterData> dataList;
+    [SerializeField] public GameObject startPanel;
     private MatchSessionScript matchSession;
 
     public void Awake()
@@ -39,6 +40,7 @@ public class CharSelectManagerScript : SelectScript
             Destroy(input.gameObject);
             return;
         }
+        startPanel.SetActive(false);
         // Get the PlayerSlotBehaviour from the prefab instance spawned by PlayerInputManager
         var behaviour = input.GetComponent<PlayerSlotBehaviour>();
 
@@ -73,8 +75,27 @@ public class CharSelectManagerScript : SelectScript
 
             if (players.All(p => p.lockedIn))
             {
-                StartMatch();
+                startPanel.SetActive(true);
+            } else
+            {
+                startPanel.SetActive(false);
             }
+        } else
+        {
+            player.lockedIn = false;
+            player.selected = null;
+            slotTexts[player.playerIndex].text = "Choosing...";
+            slotImages[player.playerIndex].sprite = null;
+            startPanel.SetActive(false);
+        }
+    }
+
+    public override void Back(PlayerSlot player)
+    {
+        if (!player.lockedIn)
+        {
+            matchSession.ClearPlayers();
+            SceneManager.LoadScene("Main Menu");
         } else
         {
             player.lockedIn = false;
@@ -84,11 +105,27 @@ public class CharSelectManagerScript : SelectScript
         }
     }
 
+    public override void Start()
+    {
+        if (players.Count > 1 && players.All(p => p.lockedIn))
+        {
+            StartMatch();
+        }
+    }
+
+    public override void Select(PlayerSlot slot)
+    {
+        if (players.Count >= 4) return;
+        PlayerSlot aiSlot = new PlayerSlot { playerIndex = players.Count, cursorIndex = slot.cursorIndex, input = null, lockedIn = false, selected = dataList[slot.cursorIndex] };
+        players.Add(aiSlot);
+        LockIn(aiSlot);
+    }
+
     void StartMatch()
     {
         foreach (PlayerSlot player in players)
         {
-            matchSession.AddPlayer(new PlayerSelection { inputDev = player.input.devices[0], character = (CharacterData)player.selected, playerIndex = player.playerIndex });
+            matchSession.AddPlayer(new PlayerSelection { inputDev = player.input ? player.input.devices[0] : null, character = (CharacterData)player.selected, playerIndex = player.playerIndex });
         }
         // TODO: Transitiony stuff (fade out or something)
         SceneManager.LoadScene("Stage Select");

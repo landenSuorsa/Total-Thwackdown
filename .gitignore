@@ -97,3 +97,17 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# ---------------- Unity Packages ----------------
+# Ignore cached packages downloaded by Unity Package Manager
+/[Pp]ackages/manifest.json.lock
+/[Pp]ackages/packages-lock.json
+/[Pp]ackages/com.unity.*.cache/
+
+# Ignore TMP (TextMeshPro) generated files
+/[Aa]ssets/TextMesh Pro/Resources/*.asset
+/[Aa]ssets/TextMesh Pro/Editor/Resources/*.asset
+/[Aa]ssets/TextMesh Pro/GeneratedResources/
+
+# Optional: ignore other generated package files
+/[Aa]ssets/Cinemachine/Generated/

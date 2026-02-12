@@ -5,7 +5,7 @@ using UnityEngine.TextCore.Text;
 public class FireScript : MonoBehaviour
 {
     public List<Character> hitTargets = new List<Character> ();
-    [SerializeField] AttackData attackData;
+    [SerializeField] public AttackData attackData;
     [SerializeField] float lifetime = 3f;
     public float attackModifier = 1f;
     float timeCreated = -1f;

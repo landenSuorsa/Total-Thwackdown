@@ -108,7 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   hitTargets: []
   attackData:
-    damageAmount: 3
+    damageAmount: 2
     knockback_dir: {x: 1, y: 1}
     stunAmount: 0.8
   lifetime: 6

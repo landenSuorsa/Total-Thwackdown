@@ -1,5 +1,9 @@
 using System.Collections.Generic;
+using TMPro;
+using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.InputSystem.Android;
+using UnityEngine.UI;
 
 public class StageManagerScript : MonoBehaviour
 {

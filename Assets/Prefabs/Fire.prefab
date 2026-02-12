@@ -177,7 +177,7 @@ MonoBehaviour:
   hitTargets: []
   attackData:
     damageAmount: 3
-    knockback_dir: {x: 1, y: 1}
-    stunAmount: 0.8
-  lifetime: 3
+    knockback_dir: {x: 1, y: 0}
+    stunAmount: 1
+  lifetime: 2
   attackModifier: 1

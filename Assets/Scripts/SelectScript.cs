@@ -29,4 +29,19 @@ public abstract class SelectScript : MonoBehaviour
     {
         players.Add(player);
     }
+
+    public virtual void Start()
+    {
+        return;
+    }
+
+    public virtual void Select(PlayerSlot slot)
+    {
+        return;
+    }
+
+    public virtual void Back(PlayerSlot slot)
+    {
+        return;
+    }
 }
